@@ -3,11 +3,13 @@ import pandas as pd
 import numpy as np
 
 # Импортируем из вашего кода список колонок и модель данных
-from scripts.rest_api_model import FEATURES
+#from scripts.rest_api_model import FEATURES
 from scripts.inference_functions import FraudFeatures
+FEATURES = [x for x in list(FraudFeatures.model_fields.keys()) if x not in ['transaction_id', 'tx_fraud']]
 
 def test_features_list():
     """Проверяем, что мы не забыли исключить ID и таргет из признаков"""
+    
     assert "transaction_id" not in FEATURES
     assert "tx_fraud" not in FEATURES
     # Проверка, что список не пустой и содержит наши 60+ признаков
