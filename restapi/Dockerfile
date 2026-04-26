@@ -4,6 +4,7 @@ FROM python:3.8-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
     openjdk-17-jre-headless \
     procps \
+    curl \
     && mkdir -p /usr/local/share/ca-certificates/Yandex \
     && curl https://storage.yandexcloud.net/cloud-certs/CA.pem \
     -o /usr/local/share/ca-certificates/Yandex/YandexInternalRootCA.crt \
