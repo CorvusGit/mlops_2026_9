@@ -115,7 +115,7 @@ jobs:
         run: |
           IMAGE_PATH=cr.yandex/${{ env.YC_REGISTRY_ID }}/fraud-api:${{ github.sha }}
           MLFLOW_URL="http://${{ secrets.MLFLOW_IP }}:${{ secrets.MLFLOW_PORT }}"
-          KAFKA_URL = "${{ secrets.KAFKA_FQDN }}:${{ secrets.KAFKA_PORT }}"
+          KAFKA_URL="${{ secrets.KAFKA_FQDN }}:${{ secrets.KAFKA_PORT }}"
 
           # Заменяем образ, адрес MLFlow и адрес Kafka в шаблоне
           sed -e "s|{{IMAGE_PLACEHOLDER}}|$IMAGE_PATH|g" \
