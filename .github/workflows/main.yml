@@ -79,7 +79,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          pip install pytest pandas numpy pydantic loguru mlflow pyspark
+          pip install pytest pandas numpy pydantic loguru mlflow pyspark fastapi mlflow aiokafka
           export PYTHONPATH=$PYTHONPATH:$(pwd)/restapi
           pytest restapi/tests/
       
