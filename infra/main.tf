@@ -107,6 +107,7 @@ S3_ENDPOINT_URL=${var.yc_storage_endpoint_url}
 S3_BUCKET_NAME=${module.storage.bucket}
 S3_ACCESS_KEY=${module.iam.access_key}
 S3_SECRET_KEY=${module.iam.secret_key}
+YC_FOLDER_ID=${var.yc_config.folder_id}
 MLFLOW_IP=${var.mlflow_ip_address}
 MLFLOW_PORT=${var.mlflow_port}
 PERSIST_BUCKET_NAME=${var.mlflow_buket_name}

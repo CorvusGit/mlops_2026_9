@@ -46,3 +46,11 @@ sudo chmod 644 /opt/app/YandexCA.pem
 
 airflow-bucket-cb002ea29bd66f5c
 kafka_host = "rc1a-05unpqf6hv5b1u6b.mdb.yandexcloud.net"
+
+
+
+KAFKA_FQDN=127.0.0.1
+KAFKA_PORT=9092
+KAFKA_USER=user
+KAFKA_PASS=kafka
+YC_FOLDER_ID=b1gukkncvsp3tvci7gp3

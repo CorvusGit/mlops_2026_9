@@ -86,19 +86,15 @@ jobs:
       # Deploy
       - name: Install Yandex Cloud CLI
         run: |
-          curl -sSL https://yandexcloud.net | bash
+          curl -sSL https://yandexcloud.net | bash -s -- -y
           echo "$HOME/yandex-cloud/bin" >> $GITHUB_PATH
 
       - name: Authenticate with Yandex Cloud
         run: |
-          # Создаем временный файл с ключом из секретов
+          # Теперь yc будет доступен
           echo '${{ secrets.YC_SA_JSON_KEY }}' > sa-key.json
-          
-          # Авторизация
           yc config set service-account-key sa-key.json
           yc config set folder-id ${{ secrets.YC_FOLDER_ID }}
-          
-          # Настройка docker-логина через yc
           yc container registry configure-docker
 
       - name: Build and Push Image
