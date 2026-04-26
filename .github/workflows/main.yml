@@ -80,6 +80,7 @@ jobs:
       - name: Run Tests
         run: |
           pip install pytest pandas numpy pydantic loguru mlflow pyspark
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/restapi
           pytest restapi/tests/
       
       # Deploy
