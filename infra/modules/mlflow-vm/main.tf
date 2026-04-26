@@ -62,7 +62,7 @@ resource "yandex_compute_instance" "mlflow" {
 
   network_interface {
     subnet_id = var.subnet_id
-    nat       = true
+    nat       = false
     ip_address = var.ip_address
   }
 
