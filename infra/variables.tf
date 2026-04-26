@@ -144,6 +144,11 @@ variable "kafka_instance_name" {
   type    = string
 }
 
+variable "kafka_port" {
+  type = string
+  default = "9092"
+}
+
 variable "k8s_instance_name" {
   type    = string
 }

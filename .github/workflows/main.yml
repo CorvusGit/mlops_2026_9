@@ -13,7 +13,6 @@ env:
   YC_REGISTRY_ID: ${{ secrets.YC_REGISTRY_ID }}
 
 jobs:
-  # 1. Анализатор изменений
   changes:
     runs-on: ubuntu-latest
     outputs:
@@ -28,18 +27,16 @@ jobs:
           filters: |
             dags: ['dags/**']
             src: ['src/**']
-            inference: ['restapi/**', ]
+            model: ['restapi/**']
 
-  # 2. Синхронизация DAGs (ваша задача)
+  # Ваши существующие задачи для Airflow
   sync-dags:
     needs: changes
     if: ${{ needs.changes.outputs.dags == 'true' }}
-    name: Sync dags to S3
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Upload to S3
-        uses: jakejarvis/s3-sync-action@master
+      - uses: jakejarvis/s3-sync-action@master
         with:
           args: --delete
         env:
@@ -53,12 +50,10 @@ jobs:
   upload-src:
     needs: changes
     if: ${{ needs.changes.outputs.src == 'true' }}
-    name: Upload Source code to S3
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Upload to S3
-        uses: jakejarvis/s3-sync-action@master
+      - uses: jakejarvis/s3-sync-action@master
         with:
           args: --delete
         env:
@@ -69,48 +64,54 @@ jobs:
           SOURCE_DIR: 'src'
           DEST_DIR: 'src'
 
+  # REST API
   build-and-deploy-model:
     needs: changes
-    if: ${{ needs.changes.outputs.inference == 'true' }}
-    name: Build Model and Update K8s Manifest
+    if: ${{ needs.changes.outputs.model == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - name: Set up Python
+      # Тесты  
+      - name: Set up Python 3.8
         uses: actions/setup-python@v4
         with:
           python-version: '3.8'
 
-      # Тесты
-      - name: Install test dependencies
+      - name: Run Tests
         run: |
           pip install pytest pandas numpy pydantic loguru mlflow pyspark
-          
-      - name: Run unit tests
-        run: pytest restapi/tests/
-
-      - name: Authenticate with Yandex Cloud
+          pytest restapi/tests/
+      
+      # Deploy
+      - name: Yandex Cloud Auth
         uses: yc-actions/yc-setup@v2
         with:
           zb_sa_json_key: ${{ secrets.YC_SA_JSON_KEY }}
 
-      - name: Login to Registry
-        run: yc container registry configure-docker
-
-      - name: Build and Push Docker Image
+      - name: Build and Push Image
         run: |
           IMAGE_PATH=cr.yandex/${{ env.YC_REGISTRY_ID }}/fraud-api:${{ github.sha }}
-          docker build -t $IMAGE_PATH .
+          yc container registry configure-docker
+          docker build -t $IMAGE_PATH -f restapi/Dockerfile restapi/
           docker push $IMAGE_PATH
 
-      - name: Prepare and Upload K8s Manifest to S3
+      - name: Prepare and Upload K8s Manifests to S3
         run: |
           IMAGE_PATH=cr.yandex/${{ env.YC_REGISTRY_ID }}/fraud-api:${{ github.sha }}
-          sed "s|{{IMAGE_PLACEHOLDER}}|$IMAGE_PATH|g" k8s/deployment-template.yaml > deployment.yaml
+          MLFLOW_URL="http://${{ secrets.MLFLOW_IP }}:${{ secrets.MLFLOW_PORT }}"
+          KAFKA_URL = "${{ secrets.KAFKA_FQDN }}:${{ secrets.KAFKA_PORT }}"
+
+          # Заменяем образ, адрес MLFlow и адрес Kafka в шаблоне
+          sed -e "s|{{IMAGE_PLACEHOLDER}}|$IMAGE_PATH|g" \
+              -e "s|{{MLFLOW_URL}}|$MLFLOW_URL|g" \
+              -e "s|{{KAFKA_URL}}|$KAFKA_URL|g" \
+              -e "s|{{KAFKA_USER}}|${{ secrets.KAFKA_USER }}|g" \
+              -e "s|{{KAFKA_PASS}}|${{ secrets.KAFKA_PASS }}|g" \
+              restapi/k8s/deployment-template.yaml > deployment.yaml
           
-          aws s3 cp deployment.yaml s3://${{ env.YC_S3_BUCKET }}/k8s/deployment.yaml \
-            --endpoint-url ${{ env.YC_S3_ENDPOINT }}
+          # Загружаем готовый файл в S3
+          aws s3 cp deployment.yaml s3://${{ env.YC_S3_BUCKET }}/k8s/deployment.yaml --endpoint-url ${{ env.YC_S3_ENDPOINT }}
+          aws s3 cp restapi/k8s/service.yaml s3://${{ env.YC_S3_BUCKET }}/k8s/service.yaml --endpoint-url ${{ env.YC_S3_ENDPOINT }}
         env:
           AWS_ACCESS_KEY_ID: ${{ env.YC_S3_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ env.YC_S3_SECRET_ACCESS_KEY }}

@@ -16,24 +16,27 @@ spec:
     spec:
       containers:
       - name: fraud-api-container
-        image: restapiv3:latest 
+        image: {{IMAGE_PLACEHOLDER}} 
         imagePullPolicy: Never # для локальной разработки
         ports:
         - containerPort: 8000
         env:
-        # Указываем адреса хостовой машины
         - name: MLFLOW_TRACKING_URI
-          value: "http://192.168.88.251:5005"
+          value: "{{MLFLOW_URL}}"
         - name: KAFKA_BOOTSTRAP_SERVERS
-          value: "192.168.88.251:9092"
+          value: "{{KAFKA_URL}}"
+        - name: KAFKA_USER
+          value: "{{KAFKA_USER}}"
+        - name: KAFKA_PASS
+          value: "{{KAFKA_PASS}}"
         - name: KAFKA_TOPIC_OUT
           value: "predictions"
         resources:
           requests:
-            memory: "2Gi"
+            memory: "1Gi"
             cpu: "500m"
           limits:
-            memory: "4Gi"
+            memory: "2Gi"
             cpu: "1000m"
         # Проверки работоспособности
         livenessProbe:

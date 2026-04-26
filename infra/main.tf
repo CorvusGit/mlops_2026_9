@@ -98,11 +98,11 @@ data "local_file" "existing_env" {
 resource "local_file" "env_config" {
   filename = "../.env"
   
+#AIRFLOW_URL=https://c-${module.airflow-cluster.airflow_id}.airflow.yandexcloud.net
+#AIRFLOW_ADMIN_PASSWORD=${var.admin_password}
   content = <<EOT
 ${data.local_file.existing_env.content}
 # Добавлено Terraform:
-AIRFLOW_URL=https://c-${module.airflow-cluster.airflow_id}.airflow.yandexcloud.net
-AIRFLOW_ADMIN_PASSWORD=${var.admin_password}
 S3_ENDPOINT_URL=${var.yc_storage_endpoint_url}
 S3_BUCKET_NAME=${module.storage.bucket}
 S3_ACCESS_KEY=${module.iam.access_key}
@@ -120,6 +120,10 @@ YC_SA_JSON_KEY           = ${jsonencode({
       public_key         = module.iam.public_key
       private_key        = module.iam.private_key
     })}
+KAFKA_FQDN = "127.0.0.1"
+KAFKA_PORT = var.kafka_port
+KAFKA_USER = var.kafka_user
+KAFKA_PASS = var.kafka_pwd
 
 EOT
 
@@ -128,6 +132,8 @@ EOT
     module.storage
   ]
 }
+
+#module.kafka.kafka_host_fqdn
 
 
 # locals {

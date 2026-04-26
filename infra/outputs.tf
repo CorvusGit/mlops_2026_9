@@ -8,7 +8,16 @@ output "new_bucket_name" {
   description = "Name of the created bucket"
 }
 
-output "kafka_host" {
-  value = module.kafka.kafka_host_fqdn
-  description = "kafka_host_fqdn"
+# output "kafka_host" {
+#   value = module.kafka.kafka_host_fqdn
+#   description = "kafka_host_fqdn"
+# }
+
+
+output "k8s_cluster_internal_fqdn" {
+  value = module.k8s.k8s_cluster_internal_fqdn
+}
+
+output "registry_id" {
+  value = module.k8s.registry_id
 }

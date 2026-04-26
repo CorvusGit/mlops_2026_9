@@ -18,7 +18,11 @@ resource "yandex_resourcemanager_folder_iam_member" "sa_roles" {
     "storage.viewer",
     "storage.editor",
     "logging.writer",
-    "lockbox.payloadViewer"
+    "lockbox.payloadViewer",
+    "k8s.editor",
+    "k8s.cluster-api.admin",
+    "k8s.clusters.agent",
+    "container-registry.editor"
   ])
 
   folder_id = var.provider_config.folder_id

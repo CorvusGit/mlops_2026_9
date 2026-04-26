@@ -1,11 +1,11 @@
 # modules/k8s/main.tf
 
-resource "yandex_kubernetes_cluster" "k8s_cluster" {
+resource "yandex_kubernetes_cluster" "kub_cluster" {
   name       = var.instance_name
   network_id = var.network_id
 
   master {
-    version = "1.28"
+    version = "1.31"
     zonal {
       zone      = var.provider_config.zone
       subnet_id = var.subnet_id
@@ -24,8 +24,8 @@ resource "yandex_kubernetes_cluster" "k8s_cluster" {
   node_service_account_id = var.service_account_id
 }
 
-resource "yandex_kubernetes_node_group" "k8s_nodes" {
-  cluster_id = yandex_kubernetes_cluster.k8s_cluster.id
+resource "yandex_kubernetes_node_group" "kub_nodes" {
+  cluster_id = yandex_kubernetes_cluster.kub_cluster.id
   name       = "minimal-node-group"
 
   instance_template {
@@ -38,7 +38,7 @@ resource "yandex_kubernetes_node_group" "k8s_nodes" {
 
     boot_disk {
       type = "network-ssd"
-      size = 20 # GB
+      size = 30 # GB
     }
 
     network_interface {
@@ -53,7 +53,7 @@ resource "yandex_kubernetes_node_group" "k8s_nodes" {
 
   scale_policy {
     fixed_scale {
-      size = 3
+      size = 1
     }
   }
 

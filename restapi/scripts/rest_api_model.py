@@ -27,6 +27,12 @@ MLFLOW_CONN = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5005")
 
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 
+KAFKA_USER = os.getenv("KAFKA_USER")
+KAFKA_PASS = os.getenv("KAFKA_PASS")
+
+# Путь к сертификату в образе (после update-ca-certificates он доступен в системе)
+CERT_PATH = "/usr/local/share/ca-certificates/Yandex/YandexInternalRootCA.crt"
+
 KAFKA_TOPIC_OUT = os.getenv("KAFKA_TOPIC_OUT", "predictions")
 print(f'KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}')
 
@@ -57,7 +63,13 @@ async def startup_event():
     global producer
     producer = AIOKafkaProducer(
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-        value_serializer=lambda v: json.dumps(v).encode('utf-8')
+        value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+        # Настройки для Yandex Managed Kafka
+        security_protocol="SASL_SSL",
+        sasl_mechanism="SCRAM-SHA-512",
+        sasl_plain_username=KAFKA_USER,
+        sasl_plain_password=KAFKA_PASS,
+        ssl_context=None # Использовать системные сертификаты (куда мы добавили Yandex CA)
     )
     await producer.start()
     logger.info(f"Kafka Producer started on {KAFKA_BOOTSTRAP_SERVERS}")
