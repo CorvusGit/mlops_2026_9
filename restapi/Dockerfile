@@ -1,16 +1,17 @@
 FROM python:3.8-slim
 
-# Установка Java
+# Установка Java, curl и сертификатов
 RUN apt-get update && apt-get install -y --no-install-recommends \
     openjdk-17-jre-headless \
     procps \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* \
-    apt-get update && apt-get install -y curl && \
-    mkdir -p /usr/local/share/ca-certificates/Yandex && \
-    curl -sSL https://yandexcloud.net \
-    -o /usr/local/share/ca-certificates/Yandex/YandexInternalRootCA.crt && \
-    chmod 644 /usr/local/share/ca-certificates/Yandex/YandexInternalRootCA.crt && \
-    update-ca-certificates
+    curl \
+    && mkdir -p /usr/local/share/ca-certificates/Yandex \
+    && curl -o YandexCA.pem https://storage.yandexcloud.net/cloud-certs/CA.pem \
+    -o /usr/local/share/ca-certificates/Yandex/YandexInternalRootCA.crt \
+    && chmod 644 /usr/local/share/ca-certificates/Yandex/YandexInternalRootCA.crt \
+    && update-ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Настройка переменных окружения для Java
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
