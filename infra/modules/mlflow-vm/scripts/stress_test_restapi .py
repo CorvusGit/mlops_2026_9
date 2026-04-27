@@ -330,8 +330,8 @@ def stream_s3_parquet_to_restapi_json(
 ):
     ST = int(datetime.strptime(start_date_time, "%Y-%m-%d %H:%M:%S").timestamp())
     ET = int(datetime.strptime(end_date_time, "%Y-%m-%d %H:%M:%S").timestamp())
-    URL = "http://192.168.49.2:32484/predict" #"http://localhost:8000/predict"
-    
+    URL = "https://10.0.0.21:8000/predict" #"https://10.0.0.21:32484/predict"
+
     config = conf
     #config.update({
     #    'auto.register.schemas': False,
@@ -363,17 +363,35 @@ def stream_s3_parquet_to_restapi_json(
         # Оставляем только нужный временной интервал из файла
         df_filtered = df[(df['unix_time'] >= ST) & (df['unix_time'] <= ET)]
         if df_filtered.empty: continue
-
+        payloads_list = []
         for _, row in df_filtered.iterrows():
             # проверка лимитов
             if max_messages and count >= max_messages:
                 print(f"Достигнут лимит сообщений: {max_messages}")
-                response = requests.post(URL, json=test_data)
+                try:
+                    response = requests.post(URL, json=payloads_list)
+                    response.raise_for_status()
+                    payloads_list = []
+                    print("Статус-код:", response.status_code)
+                    print("Ответ сервера:", json.dumps(response.json(), indent=4, ensure_ascii=False))
+                except Exception as e:
+                    print(f"Ошибка при запросе: {e}")
+                    if response := getattr(e, 'response', None):
+                        print("Детали ошибки:", response.text)
                 return count
             
             if max_duration and (time.time() - test_start_wall_time) >= max_duration:
                 print(f"Достигнут лимит времени: {max_duration} сек")
-                producer.flush()
+                try:
+                    response = requests.post(URL, json=payloads_list)
+                    response.raise_for_status()
+                    payloads_list = []
+                    print("Статус-код:", response.status_code)
+                    print("Ответ сервера:", json.dumps(response.json(), indent=4, ensure_ascii=False))
+                except Exception as e:
+                    print(f"Ошибка при запросе: {e}")
+                    if response := getattr(e, 'response', None):
+                        print("Детали ошибки:", response.text)
                 return count
 
             # Формирование сообщения
@@ -383,7 +401,7 @@ def stream_s3_parquet_to_restapi_json(
             message['tx_fraud'] = int(message['tx_fraud'])
             
             payload = json.dumps(message, default=str).encode('utf-8')
-            producer.produce(topic, value=payload, callback=delivery_report)
+            payloads_list.append(payload)
             count += 1
             
             # Ритмичная отправка (прецизионный тайминг)
@@ -394,9 +412,17 @@ def stream_s3_parquet_to_restapi_json(
                 time.sleep(sleep_time)
                 
             if count % 1000 == 0:
-                producer.poll(0)
+                try:
+                    response = requests.post(URL, json=payloads_list)
+                    response.raise_for_status()
+                    payloads_list = []
+                    #print("Статус-код:", response.status_code)
+                    #print("Ответ сервера:", json.dumps(response.json(), indent=4, ensure_ascii=False))
+                except Exception as e:
+                    print(f"Ошибка при запросе: {e}")
+                    if response := getattr(e, 'response', None):
+                        print("Детали ошибки:", response.text)
 
-    producer.flush()
     print(f"Поток завершен. Всего отправлено: {count}")
     return count
 

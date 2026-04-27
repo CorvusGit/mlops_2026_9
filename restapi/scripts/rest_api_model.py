@@ -20,6 +20,7 @@ from typing import List
 import asyncio
 from aiokafka import AIOKafkaProducer
 import json
+import ssl
 
 FEATURES = [x for x in list(FraudFeatures.model_fields.keys()) if x not in ['transaction_id', 'tx_fraud']]
 
@@ -61,6 +62,9 @@ producer = None
 @app.on_event("startup")
 async def startup_event():
     global producer
+    
+    context = ssl.create_default_context()
+
     producer = AIOKafkaProducer(
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
         value_serializer=lambda v: json.dumps(v).encode('utf-8'),
@@ -69,7 +73,7 @@ async def startup_event():
         sasl_mechanism="SCRAM-SHA-512",
         sasl_plain_username=KAFKA_USER,
         sasl_plain_password=KAFKA_PASS,
-        ssl_context=None # Использовать системные сертификаты (куда мы добавили Yandex CA)
+        ssl_context=context # Использовать системные сертификаты (куда мы добавили Yandex CA)
     )
     await producer.start()
     logger.info(f"Kafka Producer started on {KAFKA_BOOTSTRAP_SERVERS}")
