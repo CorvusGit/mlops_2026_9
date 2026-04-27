@@ -17,7 +17,7 @@ spec:
       containers:
       - name: fraud-api-container
         image: {{IMAGE_PLACEHOLDER}} 
-        imagePullPolicy: Never # для локальной разработки
+        imagePullPolicy: IfNotPresent # для локальной разработки
         ports:
         - containerPort: 8000
         env:
