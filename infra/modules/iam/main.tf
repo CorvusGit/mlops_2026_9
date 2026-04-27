@@ -21,6 +21,7 @@ resource "yandex_resourcemanager_folder_iam_member" "sa_roles" {
     "lockbox.payloadViewer",
     "k8s.editor",
     "k8s.cluster-api.admin",
+    "k8s.cluster-api.cluster-admin",
     "k8s.clusters.agent",
     "container-registry.editor",
     "k8s.admin",

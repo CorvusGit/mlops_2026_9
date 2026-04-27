@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fraud-api-deployment
+  labels:
+    app: fraud-api
+spec:
+  replicas: 1  # Для начала одного пода достаточно
+  selector:
+    matchLabels:
+      app: fraud-api
+  template:
+    metadata:
+      labels:
+        app: fraud-api
+    spec:
+      containers:
+      - name: fraud-api-container
+        image: cr.yandex/crpe3713f7miuqes2u6m/fraud-api:3a5324c1cad234337d96384883cf392f87c3afeb 
+        imagePullPolicy: IfNotPresent # для локальной разработки
+        ports:
+        - containerPort: 8000
+        env:
+        - name: MLFLOW_TRACKING_URI
+          value: "http://10.0.0.100:5005"
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "127.0.0.1:var.kafka_port"
+        - name: KAFKA_USER
+          value: "var.kafka_user"
+        - name: KAFKA_PASS
+          value: "var.kafka_pwd"
+        - name: KAFKA_TOPIC_OUT
+          value: "predictions"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        # Проверки работоспособности
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 5
