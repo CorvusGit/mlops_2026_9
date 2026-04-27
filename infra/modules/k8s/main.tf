@@ -16,7 +16,7 @@ resource "yandex_kubernetes_cluster" "kub_cluster" {
     }
 
     # ЗАКРЫВАЕМ API ОТ ИНТЕРНЕТА
-    public_ip = false 
+    public_ip = true 
   }
 
   
@@ -29,10 +29,10 @@ resource "yandex_kubernetes_node_group" "kub_nodes" {
   name       = "minimal-node-group"
 
   instance_template {
-    platform_id = "standard-v3"
+    platform_id = "standard-v1"
 
     resources {
-      memory = 8  # GB
+      memory = 4  # GB
       cores  = 2
     }
 

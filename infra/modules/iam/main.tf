@@ -22,7 +22,9 @@ resource "yandex_resourcemanager_folder_iam_member" "sa_roles" {
     "k8s.editor",
     "k8s.cluster-api.admin",
     "k8s.clusters.agent",
-    "container-registry.editor"
+    "container-registry.editor",
+    "k8s.admin",
+    "vpc.publicAdmin"
   ])
 
   folder_id = var.provider_config.folder_id
