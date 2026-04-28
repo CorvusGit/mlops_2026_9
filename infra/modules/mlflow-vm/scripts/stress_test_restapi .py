@@ -330,14 +330,14 @@ def stream_s3_parquet_to_restapi_json(
 ):
     ST = int(datetime.strptime(start_date_time, "%Y-%m-%d %H:%M:%S").timestamp())
     ET = int(datetime.strptime(end_date_time, "%Y-%m-%d %H:%M:%S").timestamp())
-    URL = "https://10.0.0.21:8000/predict" #"https://10.0.0.21:32484/predict"
+    URL = "http://10.0.0.36:30503/predict" #"https://10.0.0.21:32484/predict"
 
     config = conf
     #config.update({
     #    'auto.register.schemas': False,
     #    'use.latest.version': True
     #})
-    producer = Producer(config)
+    #producer = Producer(config)
 
     def delivery_report(err, msg):
         if err is not None:
@@ -363,7 +363,9 @@ def stream_s3_parquet_to_restapi_json(
         # Оставляем только нужный временной интервал из файла
         df_filtered = df[(df['unix_time'] >= ST) & (df['unix_time'] <= ET)]
         if df_filtered.empty: continue
+        
         payloads_list = []
+
         for _, row in df_filtered.iterrows():
             # проверка лимитов
             if max_messages and count >= max_messages:
@@ -400,8 +402,8 @@ def stream_s3_parquet_to_restapi_json(
             message['unix_time'] = int(message['unix_time'])
             message['tx_fraud'] = int(message['tx_fraud'])
             
-            payload = json.dumps(message, default=str).encode('utf-8')
-            payloads_list.append(payload)
+            payload = json.dumps(message, default=str)
+            payloads_list.append(message)
             count += 1
             
             # Ритмичная отправка (прецизионный тайминг)
@@ -428,7 +430,7 @@ def stream_s3_parquet_to_restapi_json(
 
 def run_test_step(rps, duration, step_args):
     # запускаем эмулятор в фоновом процессе
-    p = mp.Process(target=stream_s3_parquet_to_kafka_json, kwargs={
+    p = mp.Process(target=stream_s3_parquet_to_restapi_json, kwargs={
         **step_args,
         'rps': rps,
         'max_duration': duration
@@ -546,17 +548,17 @@ def s3_to_kafka(
         while proc.is_alive():
             time.sleep(check_interval)
             
-            in_total = get_topic_count(IN_TOPIC,conf)
+            #in_total = get_topic_count(IN_TOPIC,conf)
             out_total = get_topic_count(OUTPUT_TOPIC,conf)
             
             results.append({
                 'rps': current_rps,
                 'timestamp': int(time.time() - start_time),
-                'input_total': in_total,
+                #'input_total': in_total,
                 'output_total': out_total,
-                'lag': in_total - out_total
+                'lag': out_total
             })
-            print(f"[{current_rps} RPS] Lag: {in_total - out_total}")
+            print(f"[{current_rps} RPS] Lag: {out_total}")
 
         proc.join() # убеждаемся, что процесс завершен
         print(f"Ступень {current_rps} завершена. Пауза 10с для стабилизации...")

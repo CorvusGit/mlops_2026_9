@@ -2,7 +2,7 @@ import requests
 import json
 
 # URL вашего API (замените порт, если используете другой)
-URL = "http://192.168.49.2:32484/predict" #"http://localhost:8000/predict"
+URL = "http://111.88.249.36:8000/predict" #"http://localhost:8000/predict"
 
 # Данные для теста (один пример в списке)
 test_data = [

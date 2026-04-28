@@ -3,8 +3,9 @@ kind: Service
 metadata:
   name: fraud-api-service
   annotations:
-    # Эта строка говорит Яндексу выделить IP из внутренней подсети
     yandex.cloud/load-balancer-type: internal
+    # Добавьте эту строку (замените на ваш реальный ID подсети)
+    yandex.cloud/subnet-id: e9b9dc7a9o07bm47nid4
 spec:
   type: LoadBalancer
   ports:

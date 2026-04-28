@@ -176,11 +176,11 @@ YC_SA_JSON_KEY           = ${jsonencode({
       public_key         = module.iam.public_key
       private_key        = module.iam.private_key
     })}
-KAFKA_FQDN = module.kafka.kafka_host_fqdn
-KAFKA_PORT = var.kafka_port
-KAFKA_USER = var.kafka_user
-KAFKA_PASS = var.kafka_pwd
-KUBER_ID = module.k8s.k8_cluster_id
+KAFKA_FQDN = ${module.kafka.kafka_host_fqdn}
+KAFKA_PORT = ${var.kafka_port}
+KAFKA_USER = ${var.kafka_user}
+KAFKA_PASS = ${var.kafka_pwd}
+KUBER_ID = ${module.k8s.k8_cluster_id}
 
 EOT
 

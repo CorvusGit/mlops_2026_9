@@ -2,10 +2,10 @@ yc storage s3 cp s3://otus-bucket2-b1gukkncvsp3tvci7gp3/2019-08-22.txt s3://airf
 
 cat /var/log/cloud-init-output.log
 
-yc storage s3 cp s3://otus-bucket2-b1gukkncvsp3tvci7gp3/2019-08-22.txt s3://airflow-bucket-38c6d41d5b693213/input_data/2019-08-22.txt
-yc storage s3 cp s3://otus-bucket2-b1gukkncvsp3tvci7gp3/2019-09-21.txt s3://airflow-bucket-38c6d41d5b693213/input_data/2019-09-21.txt
-yc storage s3 cp s3://otus-bucket2-b1gukkncvsp3tvci7gp3/2019-10-21.txt s3://airflow-bucket-38c6d41d5b693213/input_data/2019-10-21.txt
-yc storage s3 cp s3://otus-bucket2-b1gukkncvsp3tvci7gp3/2019-11-20.txt s3://airflow-bucket-38c6d41d5b693213/input_data/2019-11-20.txt
+yc storage s3 cp s3://otus-bucket2-b1gukkncvsp3tvci7gp3/2019-08-22.txt s3://airflow-bucket-4288498d18452328/input_data/2019-08-22.txt
+yc storage s3 cp s3://otus-bucket2-b1gukkncvsp3tvci7gp3/2019-09-21.txt s3://airflow-bucket-4288498d18452328/input_data/2019-09-21.txt
+yc storage s3 cp s3://otus-bucket2-b1gukkncvsp3tvci7gp3/2019-10-21.txt s3://airflow-bucket-4288498d18452328/input_data/2019-10-21.txt
+yc storage s3 cp s3://otus-bucket2-b1gukkncvsp3tvci7gp3/2019-11-20.txt s3://airflow-bucket-4288498d18452328/input_data/2019-11-20.txt
 
 yc storage s3 cp  \
 s3://airflow-bucket-38c6d41d5b693213/output_data_for_ml/ \
@@ -14,16 +14,16 @@ s3://otus-bucket3-b1gukkncvsp3tvci7gp3/output_data_for_ml/ \
 
 yc storage s3 cp  \
 s3://otus-bucket3-b1gukkncvsp3tvci7gp3/output_data_for_ml/ \
-s3://airflow-bucket-cb002ea29bd66f5c/output_data_for_ml/ \
+s3://airflow-bucket-4288498d18452328/output_data_for_ml/ \
 --recursive
-
+airflow-bucket-4288498d18452328
 
 airflow-bucket-f3810ee2fe72119b
 
 terraform apply -auto-approve
 terraform destroy -auto-approve
 
-ssh -L 5005:localhost:5005 ubuntu@111.88.240.71
+ssh -L 5005:localhost:5005 ubuntu@111.88.241.112
 
 
 docker-compose build --no-cache
@@ -54,3 +54,16 @@ KAFKA_PORT=9092
 KAFKA_USER=user
 KAFKA_PASS=kafka
 YC_FOLDER_ID=b1gukkncvsp3tvci7gp3
+
+
+
+sudo curl -o /opt/app/YandexCA.pem https://storage.yandexcloud.net/cloud-certs/CA.pem
+
+#посмотреть реальный адрес можно так:
+kubectl get nodes -o wide 
+kubectl logs
+kubectl get svc
+kubectl get pods --show-labels
+kubectl describe svc fraud-api-service
+
+kubectl delete -f service.yaml 
