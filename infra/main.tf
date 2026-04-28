@@ -181,6 +181,7 @@ KAFKA_PORT = ${var.kafka_port}
 KAFKA_USER = ${var.kafka_user}
 KAFKA_PASS = ${var.kafka_pwd}
 KUBER_ID = ${module.k8s.k8_cluster_id}
+SUBNET_ID = ${module.network.subnet_id}
 
 EOT
 
