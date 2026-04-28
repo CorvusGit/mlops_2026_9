@@ -22,4 +22,4 @@ driveroutput.*
 config
 history.txt
 buf
-commands.*
+commands
